@@ -12,6 +12,15 @@ def load_audio(path: str, sample_rate: int = 16000) -> np.ndarray:
     
     Returns:
         np.ndarray: Waveform of the audio file.
+    
+    Raises:
+        FileNotFoundError: If the audio file does not exist.
+        ValueError: If the audio file is not a valid audio format.
+    
+    Example:
+        >>> waveform = load_audio('path/to/audio.wav')
+        >>> print(waveform.shape)
+        (16000,)
     '''
     y, sr = librosa.load(path, sr=sample_rate, mono=True)
     return y
@@ -35,6 +44,15 @@ def compute_log_mel_spectrogram(
     
     Returns:
         torch.Tensor: Log-mel spectrogram of the audio file.
+    
+    Raises:
+        ValueError: If the waveform is not a valid audio format.
+    
+    Example:
+        >>> waveform = load_audio('path/to/audio.wav')
+        >>> spectrogram = compute_log_mel_spectrogram(waveform)
+        >>> print(spectrogram.shape)
+        (128, 32)
     '''
     # power spectrogram
     S = librosa.feature.melspectrogram(

@@ -1,12 +1,18 @@
 # This script processes audio files in the specified directory, 
 # computes their log-mel spectrograms, and saves them as PyTorch tensors.
 
+# This script is intended to be run from the command line.
+# Though I initially had problems with running the script with uv package manager,
+# I was able to run it successfully using the command: uv run python -m scripts/preprocess.py
+# I recommend doing the same if you encounter issues with uv.
+
 import os
 import sys
 import torch
 from tqdm import tqdm
-from src.utils import load_audio, compute_log_mel_spectrogram
-
+from src.utils import load_audio, compute_log_mel_spectrogram # custom utility functions
+# Add the src directory to the Python path
+# so that we can import the utils module
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 RAW_AUDIO_DIR = "data/raw/fma_small"
