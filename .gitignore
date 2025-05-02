@@ -11,3 +11,9 @@ wheels/
 
 # data folder
 data/
+
+# environment variables
+.env
+
+# models
+models/

@@ -146,6 +146,9 @@ class AudioDataset(Dataset):
         fname = str(track_id).zfill(6) + ".pt"  # Ensure track_id is zero-padded to 6 digits
         spec_path = os.path.join(self.processed_data_dir, fname)
         spec = torch.load(spec_path)
+        spec = spec.squeeze()
+        if spec.ndim != 2:
+            spec = spec.view(spec.shape[-2], spec.shape[-1])
         if self.transform:
             spec = self.transform(spec)
         label = self.label_map[genre]
