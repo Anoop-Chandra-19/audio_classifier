@@ -93,6 +93,10 @@ def main():
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
 
+    # Reduce learning rate on plateau
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, 
+                                                           patience=2, verbose=True)
+
     best_val_acc = 0.0
     os.makedirs(args.output_dir, exist_ok=True)
 
@@ -101,6 +105,8 @@ def main():
         val_loss, val_acc = evaluate(model, val_loader, criterion, device)
 
         print(f"Epoch {epoch}/{args.epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.4f}")
+
+        scheduler.step(val_loss)
 
         if val_acc > best_val_acc:
             best_val_acc = val_acc
