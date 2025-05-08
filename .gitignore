@@ -17,3 +17,7 @@ data/
 
 # models
 models/
+saved models/
+
+# logs
+logs/
