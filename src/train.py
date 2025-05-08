@@ -3,14 +3,15 @@ import os
 import argparse
 import torch
 import torch.nn as nn
+from torch import autocast, GradScaler
 from torch.utils.data import DataLoader, random_split
 import torch.nn.functional as F
 from src.data_loader import AudioDataset
 from src.model import AudioClassifier
+from src.transforms import SpecAugment 
 
 
-
-def train_one_epoch(model, loader, criterion, optimizer, device):
+def train_one_epoch(model, loader, criterion, optimizer, scaler, device):
     model.train()
     runningloss =  0.0
     for specs, labels in loader:
@@ -18,10 +19,13 @@ def train_one_epoch(model, loader, criterion, optimizer, device):
         labels = labels.to(device)
 
         optimizer.zero_grad()
-        logits = model(specs)
-        loss = criterion(logits, labels)
-        loss.backward()
-        optimizer.step()
+        with autocast(device_type=device.type):
+            logits = model(specs)
+            loss = criterion(logits, labels)
+        
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
 
         runningloss += loss.item() * specs.size(0)
     
@@ -62,7 +66,7 @@ def main():
     parser.add_argument("--label_field", default="track_genre_top")
     parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--lr", type=float, default=1e-4)
-    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--epochs", type=int, default=15)
     parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--val_split", type=float, default=0.1, help="fraction of data to use for validation")
     parser.add_argument("--output_dir", default="models")
@@ -71,10 +75,17 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
+    spec_augment = SpecAugment(time_mask_param = 30,
+                              freq_mask_param = 13,
+                              num_time_masks = 1,
+                              num_freq_masks = 1)
+    
+
     # dataset and split
     full_ds = AudioDataset(processed_data_dir=args.processed_data_dir,
                             metadata_file=args.metadata_file,
-                            label_field=args.label_field)
+                            label_field=args.label_field, 
+                            transform=spec_augment)
     n_val = int(len(full_ds) * args.val_split)
     n_train = len(full_ds) - n_val
     train_ds, val_ds = random_split(full_ds, [n_train, n_val])
@@ -94,14 +105,16 @@ def main():
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
 
     # Reduce learning rate on plateau
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, 
-                                                           patience=2, verbose=True)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.7, 
+                                                           patience=3, verbose=True)
+    
+    scaler = GradScaler("cuda", enabled= True)
 
     best_val_acc = 0.0
     os.makedirs(args.output_dir, exist_ok=True)
 
     for epoch in range(1, args.epochs + 1):
-        train_loss = train_one_epoch(model, train_loader, criterion, optimizer, device)
+        train_loss = train_one_epoch(model, train_loader, criterion, optimizer,scaler, device)
         val_loss, val_acc = evaluate(model, val_loader, criterion, device)
 
         print(f"Epoch {epoch}/{args.epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.4f}")
