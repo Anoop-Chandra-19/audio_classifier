@@ -1,44 +1,125 @@
-body {
-    font-family: Arial, sans-serif;
-    background: #f5f5f5;
-    margin: 0;
-    padding: 2rem;
+html, body {
+  height: 100%;
+  margin: 0;
 }
 
 .container {
-    max-width: 500px;
-    margin: 0 auto;
-    background: #fff;
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;      /* center horizontally */
+  justify-content: center;  /* center vertically WHEN content fits */
+  min-height: 100vh;
+  padding: 1rem;
+  box-sizing: border-box;
 }
 
+body {
+  background: #f0f2f5;
+  font-family: sans-serif;
+  padding: 2rem;
+}
+#root {
+  max-width: 600px;
+  margin: 0 auto;
+}
 h1 {
-    text-align: center;
-    margin-bottom: 1rem;
+  text-align: center;
+  margin-bottom: 1rem;
 }
-
 form {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+input[type="file"],
+button {
+  padding: 0.5rem;
+}
+button {
+  background: #4a90e2;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+}
+button:disabled {
+  background: #a0c4f2;
+  cursor: not-allowed;
+}
+.status {
+  text-align: center;
+  color: #555;
+  margin-bottom: 1rem;
+}
+.top-genre {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  text-align: center;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  transform: scale(0.9);
+  animation: fadeInScale 0.5s ease-out forwards;
+}
+.top-genre h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: #4a90e2;
+}
+.top-genre p {
+  margin: 0.5rem 0 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+.bar-container {
+  position: relative;
+  background: #e0e0e0;
+  border-radius: 4px;
+  margin: .4rem 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+.bar-fill {
+  height: 1.6rem;
+  background: #4a90e2;
+  width: 0%;
+  transition: width 0.8s ease-in-out var(--fill-delay, 0s);
 }
 
-#status {
-    text-align: center;
-    margin-bottom: 1rem;
-    color: #555;
+.bar-labels {
+  position: absolute;
+  top:0; left:0; right:0; bottom:0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 .5rem;
+  color: #fff;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
-#results .prediction{
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #eee;
+@keyframes fadeInScale {
+  to { opacity: 1; transform: scale(1); }
 }
 
-#results .prediction:last-child {
-    border-bottom: none;
+@keyframes fadeInUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fillWidth {
+  to { width: var(--target-width); }
+}
+
+.bar-fill {
+  height: 1.6rem;
+  background: #4a90e2;
+  width: 0;  /* start at zero */
+  /* run this animation once, forwards */
+  animation: fillWidth 0.8s ease-in-out forwards;
+  /* delay will be set via CSS var */
+  animation-delay: var(--fill-delay, 0s);
 }

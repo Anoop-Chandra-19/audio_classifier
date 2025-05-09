@@ -1,46 +1,97 @@
-const form    = document.getElementById('uploadForm');
-const fileIn  = document.getElementById('fileInput');
-const statusel  = document.getElementById('status');
-const results = document.getElementById('results');
+const { useState } = React;
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  results.innerHTML = '';
-  statusel.textContent = 'Uploading & classifying…';
+function App() {
+  const [file, setFile]       = useState(null);
+  const [status, setStatus]   = useState("");
+  const [results, setResults] = useState([]);
 
-  const file = fileIn.files[0];
-  if (!file) {
-    statusel.textContent = 'Please select an audio file.';
-    return;
-  }
+  const handleSubmit = async e => {
+    e.preventDefault();
+    if (!file) { setStatus("Please choose a file."); return; }
+    setStatus("Classifying…");
+    setResults([]);
 
-  const data = new FormData();
-  data.append('file', file);
+    const data = new FormData();
+    data.append("file", file);
 
-  try {
-    const res = await fetch('http://localhost:8000/predict', {
-      method: 'POST',
-      body: data
-    });
-
-    if (!res.ok) {
-      throw new Error(`Server returned ${res.status}`);
+    try {
+      const res = await fetch("http://localhost:8000/predict", {
+        method: "POST",
+        body: data
+      });
+      if (!res.ok) throw new Error(res.statusText || res.status);
+      const json = await res.json();
+      setResults(json.predictions);
+      setStatus("");
+    } catch (err) {
+      console.error(err);
+      setStatus("Error: " + err.message);
     }
+  };
 
-    const json = await res.json();
-    statusel.textContent = '';
+  // split into top‐hero + rest
+  const top  = results[0];
+  const rest = results.slice(1);
 
-    json.predictions.forEach(({ genre, confidence }) => {
-      const div = document.createElement('div');
-      div.className = 'prediction';
-      div.innerHTML = `
-        <span>${genre}</span>
-        <span>${(confidence * 100).toFixed(1)}%</span>
-      `;
-      results.appendChild(div);
-    });
-  } catch (err) {
-    statusel.textContent = 'Error: ' + err.message;
-    console.error(err);
-  }
-});
+  return (
+    <div>
+      <h1>Audio Genre Classifier</h1>
+
+      {/* 1) Hero appears above the form, pushing it up */}
+      {top && (
+        <div className="top-genre">
+          <h2>{top.genre}</h2>
+          <p>{(top.confidence * 100).toFixed(1)}%</p>
+        </div>
+      )}
+
+      {/* 2) The form stays in place but moves up when hero mounts */}
+      <form onSubmit={handleSubmit} style={{ marginBottom: "1rem" }}>
+        <input
+          type="file"
+          accept=".wav,.mp3"
+          onChange={e => setFile(e.target.files[0])}
+        />
+        <button type="submit" disabled={!file}>
+          Upload & Classify
+        </button>
+      </form>
+
+      {status && <div className="status">{status}</div>}
+
+      {/* 3) Stagger the rest of the bars and delay their fill */}
+      {rest.map((r, i) => {
+        // baseStagger: how long after hero to start?
+        const baseStagger = 0.6; // seconds
+        const delayStep   = 0.2; // seconds per bar
+
+        // delay for fadeInUp:
+        const containerDelay = baseStagger + i * delayStep;
+        // delay before filling width:
+        const fillDelay = containerDelay + 0.4; 
+
+        return (
+          <div
+            key={r.genre}
+            className="bar-container"
+            style={{ animationDelay: `${containerDelay}s` }}
+          >
+            <div
+              className="bar-fill"
+              style={{
+                "--fill-delay": `${fillDelay}s`,
+                "--target-width": `${(r.confidence * 100).toFixed(1)}%`
+              }}
+            ></div>
+            <div className="bar-labels">
+              <span>{r.genre}</span>
+              <span>{(r.confidence * 100).toFixed(1)}%</span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
