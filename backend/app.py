@@ -67,8 +67,10 @@ async def predict(file: UploadFile = File(...)):
     
     if sr != SAMPLE_RATE:
         waveform = torchaudio.functional.resample(waveform, sr, SAMPLE_RATE)
+    
+    wave = waveform.squeeze(0).cpu().numpy()
 
-    spec = compute_log_mel_spectrogram(waveform.squeeze(0).cpu(), sample_rate=SAMPLE_RATE)
+    spec = compute_log_mel_spectrogram(wave, sample_rate=SAMPLE_RATE)
 
     spec = spec.to(device).unsqueeze(0)
 
