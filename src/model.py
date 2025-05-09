@@ -26,6 +26,8 @@ class AudioClassifier(nn.Module):
         self.model = ASTForAudioClassification.from_pretrained(pretrained_model_name, 
                                                                num_labels = num_labels, token=hf_token,  
                                                                ignore_mismatched_sizes = True)
+        self.dropout = nn.Dropout(p=0.3)
+        self.classifier = nn.Linear(self.model.config.hidden_size, num_labels)
         self.mean = self.extractor.mean
         self.std = self.extractor.std
         self.max_length = self.extractor.max_length
@@ -64,9 +66,17 @@ class AudioClassifier(nn.Module):
         # Normalize the input
         pixel_values = (pixel_values - self. mean) / self.std
 
-        # Forward pass through AST
-        outputs = self.model(input_values = pixel_values)
-        return outputs.logits
+        # Let AST give us its final hidden state
+        out = self.model.audio_spectrogram_transformer(pixel_values, return_dict=True)
+
+        #extract the [CLS] token
+        cls_emb = out.pooler_output
+
+        #apply dropout
+        dropped = self.dropout(cls_emb)
+        logits = self.classifier(dropped)
+
+        return logits
 
         
         

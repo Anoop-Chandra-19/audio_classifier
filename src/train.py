@@ -75,8 +75,8 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    spec_augment = SpecAugment(time_mask_param = 30,
-                              freq_mask_param = 13,
+    spec_augment = SpecAugment(time_mask_param = 20,
+                              freq_mask_param = 10,
                               num_time_masks = 1,
                               num_freq_masks = 1)
     
@@ -101,8 +101,8 @@ def main():
 
     # model, loss, optimizer
     model = AudioClassifier(num_labels=len(full_ds.label_map)).to(device)
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.05).to(device)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=5e-3)
 
     # Reduce learning rate on plateau
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.7, 
@@ -110,7 +110,10 @@ def main():
     
     scaler = GradScaler("cuda", enabled= True)
 
+    best_val_loss = float("inf")
     best_val_acc = 0.0
+    no_improve_epochs = 0
+    patience = 3
     os.makedirs(args.output_dir, exist_ok=True)
 
     for epoch in range(1, args.epochs + 1):
@@ -121,11 +124,24 @@ def main():
 
         scheduler.step(val_loss)
 
+        # Early-stopping logic based on validation loss
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            no_improve_epochs = 0
+            print(f"   Val loss improved to {val_loss:.4f}, resetting no_improve_epochs.")
+        else:
+            no_improve_epochs += 1
+            print(f"   No improvement in val loss for {no_improve_epochs} epoch(s).")
+            if no_improve_epochs >= patience:
+                print(f"Stopping early at epoch {epoch} (no improvement for {patience} epochs).")
+                break
+
         if val_acc > best_val_acc:
             best_val_acc = val_acc
             ckpt_path = os.path.join(args.output_dir, "best_ast_fma_small.pt")
             torch.save(model.state_dict(), ckpt_path)
             print(f"Saved best model to {ckpt_path}")
+        
     
     final_path = os.path.join(args.output_dir, "final_ast_fma_small.pt")
     torch.save(model.state_dict(), final_path)
