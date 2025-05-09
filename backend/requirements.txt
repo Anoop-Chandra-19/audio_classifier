@@ -1,0 +1,10 @@
+fastapi>=0.115.12             # web framework
+uvicorn[standard]>=0.34.2     # ASGI server
+torch>=2.6.0                  # model & tensor runtime
+torchaudio>=2.6.0             # audio I/O / resampling
+transformers>=4.51.3          # AST model & feature extractor
+python-dotenv>=1.1.0          # loading .env
+librosa>=0.11.0               # log-mel spectrograms 
+soundfile>=0.12.1             # backend for librosa I/O
+python-multipart>=0.0.6       # FastAPI file‐upload support
+pandas>=2.2.3                 # metadata loading in AudioDataset 
