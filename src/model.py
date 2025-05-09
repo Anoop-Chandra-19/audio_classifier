@@ -69,8 +69,9 @@ class AudioClassifier(nn.Module):
         # Let AST give us its final hidden state
         out = self.model.audio_spectrogram_transformer(pixel_values, return_dict=True)
 
-        #extract the [CLS] token
-        cls_emb = out.pooler_output
+        # mean-poool over the time dimension instead of CLS token
+        # out.last_hidden_state is (B, T, D)
+        cls_emb = out.last_hidden_state.mean(dim=1)
 
         #apply dropout
         dropped = self.dropout(cls_emb)
