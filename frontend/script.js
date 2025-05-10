@@ -1,30 +1,40 @@
-const { useState } = React;
+const { useState, useRef, useEffect } = React;
 
 function App() {
-  const [file, setFile]       = useState(null);
-  const [status, setStatus]   = useState("");
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [file,    setFile]    = useState(null);
+  const [status,  setStatus]  = useState("");
+  const [results, setResults]= useState([]);
+  const [loading, setLoading]= useState(false);
 
-  const handleSubmit = async e => {
+  // --- NEW: ref for measuring content height
+  const contentRef = useRef(null);
+  const [maxH, setMaxH] = useState("160px");
+  const initialH = "160px";
+  const collapsedMargin = `calc(50vh - ${initialH/2}px)`;
+  const expandedMargin = "2rem";  
+
+  // When results change, measure and set
+  useEffect(() => {
+    if (results.length > 0 && contentRef.current) {
+      // scrollHeight is the full height of the content
+      const fullHeight = contentRef.current.scrollHeight;
+      setMaxH(fullHeight + "px");
+    }
+  }, [results]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) { setStatus("Please choose a file."); return; }
-    setStatus("");
-    setResults([]);
-    setLoading(true);
+    setStatus(""); setResults([]); setLoading(true);
 
-    const data = new FormData();
-    data.append("file", file);
-
+    const data = new FormData(); data.append("file", file);
     try {
       const res = await fetch("http://localhost:8000/predict", {
-        method: "POST",
-        body: data
+        method: "POST", body: data
       });
-      if (!res.ok) throw new Error(res.statusText || res.status);
-      const json = await res.json();
-      setResults(json.predictions);
-      setStatus("");
+      if (!res.ok) throw new Error(res.statusText||res.status);
+      const { predictions } = await res.json();
+      setResults(predictions);
     } catch (err) {
       console.error(err);
       setStatus("Error: " + err.message);
@@ -33,80 +43,77 @@ function App() {
     }
   };
 
-  // split into top‐hero + rest
   const top  = results[0];
   const rest = results.slice(1);
 
   return (
-    <div>
-      <h1>Audio Genre Classifier</h1>
+    // --- apply inline max-height + transition here
+    <div
+      className="container"
+      style={{
+        maxHeight: maxH,
+        margin: `${results.length > 0 ? collapsedMargin : expandedMargin} auto`,
+        transition: "max-height 0.6s ease-in-out, margin 0.6s ease-in-out",
+      }}
+    >
+      <div ref={contentRef}>
+        <h1>Audio Genre Classifier</h1>
 
-      {/* 1) Hero appears above the form, pushing it up */}
-      {top && (
-        <div className="top-genre">
-          <h2>{top.genre}</h2>
-          <p>{(top.confidence * 100).toFixed(1)}%</p>
-        </div>
-      )}
-
-      {/* 2) The form stays in place but moves up when hero mounts */}
-      <form onSubmit={handleSubmit} style={{ marginBottom: "1rem" }}>
-        <div className="file-upload">
-          <input
-            id="fileInput"
-            type="file"
-            accept=".wav,.mp3"
-            onChange={e => setFile(e.target.files[0])}
-          />
-          <label htmlFor="fileInput" className="btn">Choose File</label>
-          <span className="file-name">
-            {file ? file.name : "No file selected"}
-          </span>
-        </div>
-        <button type="submit" className="btn" disabled={!file}>
-          Upload & Classify
-        </button>
-      </form>
-
-      {loading && (
-        <div className="loader">
-          <span/><span/><span/>
+        {top && (
+          <div className="top-genre">
+            <h2>{top.genre}</h2>
+            <p>{(top.confidence*100).toFixed(1)}%</p>
           </div>
-      )}
+        )}
 
-      {status && <div className="status">{status}</div>}
+        <form onSubmit={handleSubmit} style={{ marginBottom: "1rem" }}>
+          <div className="file-upload">
+            <input
+              id="fileInput"
+              type="file"
+              accept=".wav,.mp3"
+              onChange={e => setFile(e.target.files[0])}
+            />
+            <label htmlFor="fileInput" className="btn">Choose File</label>
+            <span className="file-name">
+              {file?.name || "No file selected"}
+            </span>
+            <button type="submit" className="btn" disabled={!file}>
+              Upload &amp; Classify
+            </button>
+          </div>
+        </form>
 
-      {/* 3) Stagger the rest of the bars and delay their fill */}
-      {rest.map((r, i) => {
-        // baseStagger: how long after hero to start?
-        const baseStagger = 0.6; // seconds
-        const delayStep   = 0.2; // seconds per bar
+        {loading && (
+          <div className="loader"><span/><span/><span/></div>
+        )}
 
-        // delay for fadeInUp:
-        const containerDelay = baseStagger + i * delayStep;
-        // delay before filling width:
-        const fillDelay = containerDelay + 0.4; 
+        {status && <div className="status">{status}</div>}
 
-        return (
-          <div
-            key={r.genre}
-            className="bar-container"
-            style={{ animationDelay: `${containerDelay}s` }}
-          >
+        {rest.map((r,i) => {
+          const base = 0.6 + i*0.2,
+                fillDelay = base + 0.4;
+          return (
             <div
-              className="bar-fill"
-              style={{
-                "--fill-delay": `${fillDelay}s`,
-                "--target-width": `${(r.confidence * 100).toFixed(1)}%`
-              }}
-            ></div>
-            <div className="bar-labels">
-              <span>{r.genre}</span>
-              <span>{(r.confidence * 100).toFixed(1)}%</span>
+              key={r.genre}
+              className="bar-container"
+              style={{ animationDelay: `${base}s` }}
+            >
+              <div
+                className="bar-fill"
+                style={{
+                  "--fill-delay": `${fillDelay}s`,
+                  "--target-width": `${(r.confidence*100).toFixed(1)}%`
+                }}
+              />
+              <div className="bar-labels">
+                <span>{r.genre}</span>
+                <span>{(r.confidence*100).toFixed(1)}%</span>
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
