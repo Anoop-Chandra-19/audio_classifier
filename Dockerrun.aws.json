@@ -1,0 +1,13 @@
+{
+  "AWSEBDockerrunVersion": 2,
+  "containerDefinitions": [
+    {
+      "name": "audio-backend",
+      "image": "anoopchandra922/audio-api:1.0.0",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 8000 }
+      ]
+    }
+  ]
+}
