@@ -1,3 +1,9 @@
+*,
+*,::before,
+*::after {
+  box-sizing: border-box;
+}
+
 html, body {
   height: 100%;
   margin: 0;
@@ -23,7 +29,8 @@ html, body {
   border-radius: 12px;
   padding: 2rem;
   max-width: 600px;
-  margin: auto;
+  margin: 0 auto;
+  width: 100%;  
 }
 
 body {
@@ -178,4 +185,41 @@ button:disabled {
     40% {
         transform: translateY(-8px);
     }
+}
+
+
+.file-upload {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.file-upload input[type="file"] {
+  display: none; /* Hide the default file input */
+}
+
+.btn, .file-upload label {
+    background: #4a90e2;
+    color : white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: background 0.2s;
+}
+
+.btn:hover, .file-upload label:hover {
+    background: #3a7bd5;
+}
+
+.file-upload .file-name {
+    flex: 1;
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9rem;
+    opacity: 0.9;
 }

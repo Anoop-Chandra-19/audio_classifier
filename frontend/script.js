@@ -51,12 +51,19 @@ function App() {
 
       {/* 2) The form stays in place but moves up when hero mounts */}
       <form onSubmit={handleSubmit} style={{ marginBottom: "1rem" }}>
-        <input
-          type="file"
-          accept=".wav,.mp3"
-          onChange={e => setFile(e.target.files[0])}
-        />
-        <button type="submit" disabled={!file}>
+        <div className="file-upload">
+          <input
+            id="fileInput"
+            type="file"
+            accept=".wav,.mp3"
+            onChange={e => setFile(e.target.files[0])}
+          />
+          <label htmlFor="fileInput" className="btn">Choose File</label>
+          <span className="file-name">
+            {file ? file.name : "No file selected"}
+          </span>
+        </div>
+        <button type="submit" className="btn" disabled={!file}>
           Upload & Classify
         </button>
       </form>
