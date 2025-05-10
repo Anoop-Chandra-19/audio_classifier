@@ -1,1 +1,11 @@
-Dockerfile
+# ----- Ignore everything by default -----
+*
+
+# ----- But include our Dockerrun manifest -----
+!Dockerrun.aws.json
+
+# ----- And include the EB CLI config so eb knows what to do -----
+!.elasticbeanstalk/
+
+# (Optionally, include any .ebextensions folder if you have one)
+# !.ebextensions/
