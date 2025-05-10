@@ -12,6 +12,8 @@ WORKDIR /app
 
 # 4. Intall Python dependencies
 COPY backend/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu/ \ 
+                                            torch torchvision torchaudio 
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 5. Copy service code and model weights
