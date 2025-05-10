@@ -29,7 +29,7 @@ function App() {
 
     const data = new FormData(); data.append("file", file);
     try {
-      const res = await fetch("http://localhost:8000/predict", {
+      const res = await fetch(`${window.API_URL}/predict`, {
         method: "POST", body: data
       });
       if (!res.ok) throw new Error(res.statusText||res.status);
