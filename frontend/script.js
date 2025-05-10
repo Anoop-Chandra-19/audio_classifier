@@ -4,12 +4,14 @@ function App() {
   const [file, setFile]       = useState(null);
   const [status, setStatus]   = useState("");
   const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async e => {
     e.preventDefault();
     if (!file) { setStatus("Please choose a file."); return; }
-    setStatus("Classifying…");
+    setStatus("");
     setResults([]);
+    setLoading(true);
 
     const data = new FormData();
     data.append("file", file);
@@ -26,6 +28,8 @@ function App() {
     } catch (err) {
       console.error(err);
       setStatus("Error: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -56,6 +60,12 @@ function App() {
           Upload & Classify
         </button>
       </form>
+
+      {loading && (
+        <div className="loader">
+          <span/><span/><span/>
+          </div>
+      )}
 
       {status && <div className="status">{status}</div>}
 
