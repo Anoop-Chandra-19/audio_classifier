@@ -1,13 +1,12 @@
 {
-  "AWSEBDockerrunVersion": 1,
-  "containerDefinitions": [
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "your-dockerhub-username/audio-api:1.0.0",
+    "Update": "true"
+  },
+  "Ports": [
     {
-      "name": "audio-backend",
-      "image": "anoopchandra922/audio-api:1.0.0",
-      "essential": true,
-      "portMappings": [
-        { "containerPort": 8000 }
-      ]
+      "ContainerPort": "8000"
     }
   ]
 }
