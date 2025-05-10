@@ -11,17 +11,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # 4. Intall Python dependencies
-COPY requirements.txt .
+COPY backend/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 5. Copy service code and model weights
-COPY app.py .
+COPY backend/app.py ./app.py
 
 # assumes model lives at ./models/best_ast_fma_small.pt
-COPY ../models ./models
+COPY models/ ./models
 
 # copy python package src
-COPY ../src ./src
+COPY src/ ./src
 
 # 6. Expose the service port
 EXPOSE 8000

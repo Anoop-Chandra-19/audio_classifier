@@ -1,0 +1,12 @@
+# ignore everything except what we explicitly whitelisted below
+**
+
+# whitelist these files/folders
+!backend/app.py
+!backend/requirements.txt
+!models/best_ast_fma_small.pt
+!models/labels.json
+!src/model.py
+!src/utils.py
+!src/__init__.py
+!Dockerfile
