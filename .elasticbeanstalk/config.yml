@@ -10,8 +10,9 @@ global:
   application_name: audio-backend
   branch: null
   default_ec2_keyname: null
-  default_platform: Docker 
+  default_platform: Docker
   default_region: us-east-1
+  enable_ssh: false
   include_git_submodules: true
   instance_profile: null
   platform_name: null
@@ -20,4 +21,3 @@ global:
   repository: null
   sc: git
   workspace_type: Application
-  enable_ssh: false

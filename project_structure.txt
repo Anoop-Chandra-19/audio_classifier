@@ -1,0 +1,66 @@
+.
+├── backend
+│   ├── app.py
+│   └── requirements.txt
+├── data
+│   ├── fma_metadata
+│   │   ├── checksums
+│   │   ├── echonest.csv
+│   │   ├── features.csv
+│   │   ├── genres.csv
+│   │   ├── not_found.pickle
+│   │   ├── raw_albums.csv
+│   │   ├── raw_artists.csv
+│   │   ├── raw_echonest.csv
+│   │   ├── raw_genres.csv
+│   │   ├── raw_tracks.csv
+│   │   ├── README.txt
+│   │   └── tracks.csv
+│   ├── processed
+│   └── raw
+│       └── fma_small
+├── Dockerfile
+├── Dockerrun.aws.json
+├── eb-logs.txt
+├── frontend
+│   ├── favicon.png
+│   ├── index.html
+│   ├── script.js
+│   └── styles.css
+├── LICENSE
+├── logs
+│   ├── train2.log
+│   ├── train3.log
+│   ├── train4.log
+│   ├── train5.log
+│   ├── train6.log
+│   ├── train7.log
+│   ├── train8.log
+│   └── train.log
+├── models
+│   └── labels.json
+├── notebooks
+│   └── explore.ipynb
+├── project_structure.txt
+├── pyproject.toml
+├── README.md
+├── s3-policy.json
+├── saved models
+│   ├── original
+│   ├── train2
+│   ├── train5
+│   ├── train6
+│   ├── train7
+│   └── train 8
+├── scripts
+│   └── preprocess.py
+├── src
+│   ├── data_loader.py
+│   ├── __init__.py
+│   ├── model.py
+│   ├── train.py
+│   ├── transforms.py
+│   └── utils.py
+└── uv.lock
+
+20 directories, 44 files

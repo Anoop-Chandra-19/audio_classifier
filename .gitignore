@@ -27,3 +27,6 @@ eb-logs.txt
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.config.yml
 !.elasticbeanstalk/*.global.yml
+
+# Notebooks
+notebooks/
