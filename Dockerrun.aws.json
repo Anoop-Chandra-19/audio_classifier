@@ -2,7 +2,7 @@
 {
   "AWSEBDockerrunVersion": "1",
   "Image": {
-    "Name": "anoopchandra922/audio-api:1.0.6", 
+    "Name": "anoopchandra922/audio-api:1.0.7", 
     "Update": "true"
   },
   "Ports": [

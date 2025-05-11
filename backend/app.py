@@ -2,7 +2,7 @@ import os
 import io
 import json
 from dotenv import load_dotenv
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 import torch
 import torchaudio
@@ -45,6 +45,14 @@ model = AudioClassifier(num_labels=NUM_LABELS)
 state = torch.load(MODEL_PATH, map_location=device)
 model.load_state_dict(state)
 model.to(device).eval()
+
+@app.options("/predict")
+def preflight(response: Response):
+    response.headers["Access-Control-Allow-Origin"]  = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    return Response(status_code=204)
 
 # Prediction endpoint
 @app.post("/predict")
@@ -104,6 +112,7 @@ async def predict(file: UploadFile = File(...)):
     ]
 
     return {"predictions": results}
+
 
 
 # Optional: health check
