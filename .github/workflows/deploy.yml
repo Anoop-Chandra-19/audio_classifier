@@ -1,0 +1,41 @@
+name: CI → Elastic Beanstalk
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python & EB CLI
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+      - run: pip install --upgrade awsebcli
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id:     ${{ secrets.AWSACCESSKEY }}
+          aws-secret-access-key: ${{ secrets.AWSSACCESSKEY }}
+          aws-region:            ${{ secrets.AWSREGION }}
+
+      - name: Deploy to Elastic Beanstalk
+        env:
+          AWS_REGION:      ${{ secrets.AWSREGION }}
+          EB_ENV_NAME:     ${{ secrets.EBENVNAME }}
+        run: |
+          # Initialize (reads your .elasticbeanstalk/config.yml)
+          eb init audio-backend \
+            --region $AWSREGION \
+            --platform Docker  \
+            --interactive false
+
+          # Point at your environment and deploy
+          eb use $EBENVNAME
+          eb deploy --staged --verbose
