@@ -14,10 +14,15 @@ from src.utils import compute_log_mel_spectrogram
 # App setup 
 load_dotenv()
 app = FastAPI(title="Audio Genre Classifier")
+origins = [
+    "https://audioclassifier.cc",
+    "https://www.audioclassifier.cc"
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
