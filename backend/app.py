@@ -16,13 +16,14 @@ load_dotenv()
 app = FastAPI(title="Audio Genre Classifier")
 origins = [
     "https://audioclassifier.cc",
-    "https://www.audioclassifier.cc"
+    "https://www.audioclassifier.cc",
+    "https://audioclasssifier.cc"
 ]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
