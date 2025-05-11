@@ -17,7 +17,7 @@ app = FastAPI(title="Audio Genre Classifier")
 origins = [
     "https://audioclassifier.cc",
     "https://www.audioclassifier.cc",
-    "https://audioclasssifier.cc"
+    "https://audioclassifier.cc"
 ]
 app.add_middleware(
     CORSMiddleware,
